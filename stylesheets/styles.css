@@ -1,0 +1,65 @@
+body{margin-top: 30px;}
+h1,h2,h3,h4,h5,h6,p,td,input,button,label{font-size: 1.6rem;}
+.hidden{display: none;}
+code{white-space: pre;}
+.doc{display: inline-block; height: 200px; width: 200px;}
+img{height: 100%; width: auto; margin: 0 auto;}
+nav ul li {display: inline-block; margin-right: 8px;}
+a{text-decoration: none;}
+.master a{text-transform: uppercase;font-size: 1.5rem;}
+.active-sort{border: 2px solid blue;}
+ul.tags {
+  position: absolute;
+  bottom: 0;
+  z-index: 1;
+}
+ul.tags li{
+  display: inline-block;
+  background: rgba(255,255,255,1);
+  margin: 0 8px 0 0;
+}
+ul.tags li a {
+  display: block;
+  padding:8px;
+}
+.selection {
+  position: absolute;
+  border: 1px solid #89B;
+  background: #BCE;
+  background-color: #BEC;
+  border-color: #8B9;
+}
+.size2 {
+  height: 118px;
+  line-height: 118px;
+}
+.size3 {
+  height: 178px;
+  line-height: 178px;
+}
+.drop {
+  position: relative;
+  float: left;
+  border: 1px dashed #888;
+  background: #EEE;
+  text-align: center;
+  padding: 20px;
+  margin: 0 10px 10px 0;
+}
+.update {
+  background-color: #EBC;
+  border-color: #B89;
+}
+.active {
+  background-color: #CEB;
+  border-color: #9B8;
+}
+p{
+  clear: both;
+  margin: 0;
+  position: relative;
+  top: -12px;
+  z-index: 1;
+  background: white;
+  white-space: nowrap;
+}

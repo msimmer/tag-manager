@@ -1,0 +1,22 @@
+{
+  "name": "file_manager",
+  "authors": [
+    "Maxwell Simmer <maxwell.simmer@gmail.com>"
+  ],
+  "description": "",
+  "main": "",
+  "license": "MIT",
+  "homepage": "http://maxwellsimmer.com",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "jquery": "^3.1.0",
+    "jquery-ui": "^1.12.0",
+    "jquery-migrate": "http://code.jquery.com/jquery-migrate-1.2.1.js"
+  }
+}
