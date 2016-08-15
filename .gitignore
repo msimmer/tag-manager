@@ -39,3 +39,4 @@ Thumbs.db
 uploads/
 bower_components/
 node_modules/
+.htaccess

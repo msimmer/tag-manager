@@ -10,7 +10,7 @@ include_once 'show.php'; ?>
 <h3 class="floated" style="float:left">File Manager</h3>
 <p class="clear">Upload and tag files here.</p>
 
-<form name="fileManager" id="fileManager" method="POST" action="tag_manager.php" enctype="multipart/form-data">
+<form name="fileManager" id="fileManager" method="POST" action="<?php echo FILE_MANAGER_ASSETS_URI . 'tag_manager.php'; ?>" enctype="multipart/form-data">
   <table>
     <tr>
       <th colspan="3">Add New Files</th>
