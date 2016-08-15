@@ -51,8 +51,20 @@ include_once 'show.php'; ?>
   </table>
 </form>
 
+<table>
+  <tr>
+    <th>Sort by:</th>
+  </tr>
+  <tr>
+    <td>
+      <ul class="master" data-master=[]></ul>
+    </td>
+  </tr>
+</table>
+
 <?php
   $site = new Site;
   $content = $site->show();
   $html = $site->render($content);
-  echo $html; ?>
+  echo $html;
+  echo "<hr style='clear:both;visibility:hidden;'>";?>

@@ -39,8 +39,8 @@ class Site
       foreach ($content as $doc) {
         $html .= "<div data-filename='". $doc->file_name ."'";
         $html .= "data-id='". $doc->_id ."'";
-        $html .= "data-tags='". json_encode($doc->tags) ."' class='doc drop'>";
-        $html .= "<img src='" . FILE_MANAGER_UPLOADS_URI;
+        $html .= "data-tags='". json_encode($doc->tags) ."' class='doc'>";
+        $html .= "<img src='" . FILE_MANAGER_ASSETS_URI;
 
         switch ($doc->mime_type) {
           case 'image/jpeg':

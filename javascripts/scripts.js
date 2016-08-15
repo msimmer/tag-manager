@@ -18,7 +18,7 @@ $(function () {
     .drag("end", function (ev, dd) {
       $(dd.proxy).remove();
     });
-  $('.drop')
+  $('.doc')
     .drop("start", function () {
       $(this).addClass("active");
     })
@@ -33,7 +33,7 @@ $(function () {
   });
 
   // toggle on click
-  $('.drop').on('click', function () {
+  $('.doc').on('click', function () {
     $(this).toggleClass('update');
   });
 
@@ -150,7 +150,19 @@ $(function () {
     updateTaglist();
   });
 
+  var sameHeights = function () {
+    var h = 0;
+    $('.doc').each(function () {
+      if ($(this).height() > h) {
+        h = $(this).height();
+      }
+    });
+    $('.doc').height(h);
+  };
+
+
   // bootstrap
   updateTaglist();
+  sameHeights();
 
 });
