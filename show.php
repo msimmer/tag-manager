@@ -30,17 +30,22 @@ class Site
   }
 
   public function render($content) {
-
+    $html = '';
     try {
       if (!$content || gettype($content) != 'array') {
         throw new RuntimeException('Content isn\'t an array.');
       }
-      $html = '';
       foreach ($content as $doc) {
         $html .= "<div data-filename='". $doc->file_name ."'";
         $html .= "data-id='". $doc->_id ."'";
-        $html .= "data-publish-date='". $doc->publish_date ."'";
+        if (property_exists($doc, 'publish_date')) {
+          $html .= "data-publish-date='". $doc->publish_date ."'";
+        }
+        $html .= "data-nice-name='". $doc->name ."'";
         $html .= "data-tags='". json_encode($doc->tags) ."' class='doc'>";
+
+        $html .= "<div class='tr'>";
+        $html .= "<div class='tc'>";
         $html .= "<img src='" . FILE_MANAGER_ASSETS_URI;
 
         switch ($doc->mime_type) {
@@ -65,16 +70,31 @@ class Site
         }
 
         $html .= "'>";
+        $html .= "</div>"; // .tc
+        $html .= "</div>"; // .tr
+
+        $html .= "<div class='tr'>";
+        $html .= "<div class='tc'>";
+
         $html .= "<ul class='tags'>";
         foreach ($doc->tags as $tag) {
           $html .= "<li><a data-remove='".$tag."' href='#'>".$tag."</a></li>";
         }
         $html .= "</ul>";
-        if (isset($doc->publish_date)) {
-          $html .= "<p><b>Published</b>: ". date('Y-m-d', $doc->publish_date) ."</p>";
+        if (property_exists($doc, 'published')) {
+          $html .= "<p><b>Status</b>: ". ($doc->published ? 'Published' : 'Draft') ."</p>";
+        }
+        if (
+          property_exists($doc, 'publish_date') &&
+          gettype($doc->publish_date) == 'integer'
+        ) {
+          $html .= "<p><b>Published on</b>: ". date('Y-m-d', $doc->publish_date) ."</p>";
         }
         $html .= "<p><b>File Name</b>:". $doc->name ."</p>";
-        $html .= "</div>";
+
+        $html .= "</div>"; // .tc
+        $html .= "</div>"; // .tr
+        $html .= "</div>"; // .doc
       }
 
     } catch (RuntimeException $e) {

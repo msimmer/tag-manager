@@ -14,6 +14,7 @@ ul.tags {
 ul.master {
   text-align: left;
   list-style: none;
+  margin: 0 0 15px 30px!important;
 }
 ul.master li{
   position: relative;
@@ -26,15 +27,13 @@ ul.master .active-sort:before{
 }
 .selection {
   position: absolute;
-  border: 1px solid #89B;
-  background: #BCE;
-  background-color: #BEC;
-  border-color: #8B9;
+  border: 1px solid rgba(0,255,255,1);
+  background: rgba(0,255,255,0.6);
 }
 .doc {
   position: relative;
-  border: 1px dashed #888;
-  background: #EEE;
+  border: 1px solid #ddd;
+  background: #f9f9f9;
   text-align: center;
   padding: 10px;
   margin: 0 10px 10px 0;
@@ -45,12 +44,12 @@ ul.master .active-sort:before{
   margin:10px 0 0 0;
 }
 .update {
-  background-color: #EBC;
-  border-color: #B89;
+  background-color: rgba(0,255,255,0.7);
+  border: 1px solid #ddd;
 }
 .active {
-  background-color: #CEB;
-  border-color: #9B8;
+  background-color: rgba(0,255,255,0.3);
+  border: 1px solid rgba(0,255,255,1);
 }
 
 td.header {
@@ -73,3 +72,70 @@ table.fixed{
   margin: 0;
   text-align: left;
 }
+
+
+#metadata_window input.text.autowidth {
+  width: 155px;
+  float: right;
+}
+
+#metadata_window input.submit.autowidth {
+  width: 163px;
+  float: right;
+}
+
+#metadata_window input.checkbox.autowidth {
+  background: white;
+  border: 0;
+  position: relative;
+  width: 155px;
+  float: right;
+  top: 5px;
+  left: -10px;
+}
+
+.wrapper h3.options-header {
+  font-size: 16px;
+  font-family: Georgia, Times, Times New Roman, serif;
+  color: #777;
+  padding: 0px 0 10px 0;
+  font-style: normal;
+  border-bottom: 1px solid #ddd;
+  margin: 0 0 15px 0;
+}
+
+#sidebar .snav li:last-child a:link,
+#sidebar .snav li:last-child a:visited {
+  font: bold 13px Helvetica, Arial, sans-serif;
+  text-decoration: none !important;
+  padding: 7px 15px;
+  text-shadow: 0 1px 0 rgba(255,255,255,.5);
+  transition: all .218s;
+  -webkit-transition: all .218s;
+  -moz-transition: all .218s;
+  -o-transition: all .218s;
+  color: #333333 !important;
+  background: #dddddd;
+  background: -webkit-gradient(linear,0% 40%,0% 70%,from(#eeeeee),to(#e1e1e1));
+  background: -moz-linear-gradient(linear,0% 40%,0% 70%,from(#eeeeee),to(#e1e1e1));
+  border: solid 1px #acacac;
+  border-radius: 2px;
+  -webkit-border-radius: 2px;
+  -moz-border-radius: 2px;
+  cursor: pointer;
+  box-shadow: rgba(0,0,0, 0.06) 0px 0px 3px;
+  -moz-box-shadow: rgba(0,0,0, 0.06) 0px 0px 3px;
+  -webkit-box-shadow: rgba(0,0,0, 0.06) 0px 0px 3px;
+  display: inline-block;
+  margin-top: 30px;
+}
+
+.hidden{
+  display: none!important;
+}
+
+
+.doc{display: table}
+.tr{display: table-row;}
+.tc:first-child{display: table-cell; vertical-align: middle;}
+.tc:last-child{display: table-cell; vertical-align: bottom;}

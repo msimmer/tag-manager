@@ -1,4 +1,58 @@
 $(function () {
+
+  var timer;
+  var updateDocCount = function () {
+    clearTimeout(timer);
+    timer = setTimeout(function () {
+      $('.doc-count').html($('.update').length);
+    }, 0);
+  };
+
+  var sanitized = function () {
+    if ($('input[name=update_tags]').val().match(/^\s*$/)) {
+      return;
+    }
+    var taglist = $('input[name=update_tags]')
+      .val()
+      .split(',')
+      .map(function (item) {
+        return item.replace(/^\s*|\s*$/, '')
+      });
+    return taglist;
+  };
+
+  var updateTaglist = function () {
+    if (!$('.master').length) {
+      return;
+    }
+    $('.master').empty();
+    var master = JSON.parse($('.master').attr('data-master'));
+    $('[data-tags]').each(function () {
+      var tags = JSON.parse($(this).attr('data-tags'));
+      tags.forEach(function (tag) {
+        if (master.indexOf(tag) < 0) {
+          master.push(tag);
+        }
+      });
+    });
+    master.forEach(function (tag) {
+      $('.master').append(
+        $('<li><a data-sort="' + tag + '" href="#">' + tag + '</a></li>')
+      );
+    });
+  };
+
+  var sameHeights = function () {
+    var h = 0;
+    $('.doc').each(function () {
+      if ($(this).height() > h) {
+        h = $(this).height();
+      }
+    });
+    $('.doc').height(h);
+  };
+
+
   $(document)
     .drag('start', function (ev, dd) {
       return $('<div class="selection" />')
@@ -27,9 +81,11 @@ $(function () {
     })
     .drop('end', function () {
       $(this).removeClass('active');
+      updateDocCount();
     })
     .on('click', function () {
       $(this).toggleClass('update');
+      updateDocCount();
     });
   $.drop({
     multi: true
@@ -44,9 +100,24 @@ $(function () {
         _id: $(this).attr('data-id'),
         tags: JSON.parse($(this).attr('data-tags')),
         file_name: $(this).attr('data-filename'),
-        publish_date: $('input[name=update_publish_date]').val()
+        publish_date: $('input[name=update_publish_date]').val(),
+        published: $('input[name=published]').is(':checked'),
+        delete_selected: $('input[name=delete_selected]').is(':checked')
       });
     });
+
+    if ($('input[name=delete_selected]').is(':checked')) {
+      var filesToRemove = [];
+      $('[data-changed=true], .update').each(function () {
+        filesToRemove.push($(this).attr('data-nice-name'));
+      });
+
+      if (!confirm('You have chosen to delete the following files, this cannot be undone.\
+        \n\n' + filesToRemove.join('\n'))) {
+        return false;
+      }
+    }
+
     $('input[name=files_update]').val(JSON.stringify(updates));
   });
 
@@ -63,36 +134,7 @@ $(function () {
     $(this).parent('li').remove();
   });
 
-  var sanitized = function () {
-    if ($('input[name=update_tags]').val().match(/^\s*$/)) {
-      return;
-    }
-    var taglist = $('input[name=update_tags]')
-      .val()
-      .split(',')
-      .map(function (item) {
-        return item.replace(/^\s*|\s*$/, '')
-      });
-    return taglist;
-  };
 
-  var updateTaglist = function () {
-    $('.master').empty();
-    var master = JSON.parse($('.master').attr('data-master'));
-    $('[data-tags]').each(function () {
-      var tags = JSON.parse($(this).attr('data-tags'));
-      tags.forEach(function (tag) {
-        if (master.indexOf(tag) < 0) {
-          master.push(tag);
-        }
-      });
-    });
-    master.forEach(function (tag) {
-      $('.master').append(
-        $('<li><a data-sort="' + tag + '" href="#">' + tag + '</a></li>')
-      );
-    });
-  };
 
   $(document).on('click', '.master li a', function (e) {
     e.preventDefault();
@@ -151,16 +193,10 @@ $(function () {
     updateTaglist();
   });
 
-  var sameHeights = function () {
-    var h = 0;
-    $('.doc').each(function () {
-      if ($(this).height() > h) {
-        h = $(this).height();
-      }
-    });
-    $('.doc').height(h);
-  };
-
+  $('a[href="load.php?id=file_manager&proxy_update"]').on('click', function (e) {
+    e.preventDefault();
+    $('#update_files').trigger('click');
+  });
 
   // bootstrap
   updateTaglist();

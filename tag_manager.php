@@ -8,7 +8,7 @@ date_default_timezone_set('Europe/Berlin');
 class Utility
 {
 
-  public static function findWhere($arr, $prop, $val) {
+  public static function find_where($arr, $prop, $val) {
     foreach ($arr as $item) {
       if (
         isset($item->{$prop}) &&
@@ -20,7 +20,7 @@ class Utility
     return false;
   }
 
-  public static function findAll($arr, $prop, $val) {
+  public static function find_all($arr, $prop, $val) {
     $result = [];
     foreach ($arr as $item) {
       if (
@@ -34,7 +34,7 @@ class Utility
   }
 
   // check if a document is a member of a collection
-  public static function belongsTo($obj, $key) {
+  public static function belongs_to($obj, $key) {
     try {
       if (
         !property_exists($obj, 'collections') ||
@@ -56,7 +56,7 @@ class Utility
   }
 
   // check if a document is tagged with a specific tag
-  public static function isTagged($obj, $key) {
+  public static function is_tagged($obj, $key) {
     try {
       if (
         !property_exists($obj, 'tags') ||
@@ -77,6 +77,18 @@ class Utility
     }
   }
 
+  public static function get_key($arr, $obj) {
+    foreach ($arr as $key => $val) {
+      if (
+        property_exists($val, '_id') &&
+        $val->_id == $obj->_id
+      ) {
+        return $key;
+      }
+    }
+    return false;
+  }
+
   public static function template($data, $post, $index) {
     $pinfo = pathinfo($data['name'][$index]);
     $finfo = new finfo(FILEINFO_MIME_TYPE);
@@ -87,8 +99,12 @@ class Utility
     return (object) array(
       '_id' => sha1((string) rand(100000000000,999999999999)),
       'name' => $pinfo['basename'],
+      'published' => $post->published,
       'created_at' => time(),
-      'publish_date' => $post->update_publish_date || $post->add_publish_date,
+      'publish_date' =>
+        ($post->update_publish_date != NULL) ? $post->update_publish_date :
+        ($post->add_publish_date != NULL) ? $post->add_publish_date :
+        NULL,
       'mime_type' => $finfo->file($data['tmp_name'][$index]),
       'extension' => $pinfo['extension'],
       'file_name' => $file_name,
@@ -107,11 +123,12 @@ class Utility
 class TagManager
 {
 
-  private $files = [];
+  private $files = array();
   private $metadata = NULL;
   private $meta_path = './uploads/metadata.txt';
   private $tags = NULL;
   private $post = NULL;
+  private $trash = array();
 
   public function __construct(){
 
@@ -138,6 +155,9 @@ class TagManager
     // update metadata file
     $this->update_meta();
 
+    // remove files if there are any in the trash
+    $this->remove_files();
+
     // redirect to the referring page
     $this->finish();
 
@@ -146,6 +166,17 @@ class TagManager
   public function parse_post() {
 
     $this->post = (object) array(
+      'published' => isset(
+        $_POST['published']
+      ) &&
+      !empty(
+        $_POST['published']
+      ) ?
+      ($_POST['published'] == 'on') ?
+      true :
+      false :
+      false
+      ,
       'tags' => isset(
         $_POST['tags']
       ) &&
@@ -196,6 +227,18 @@ class TagManager
       NULL
       ,
 
+      'delete_selected' => isset(
+        $_POST['delete_selected']
+      ) &&
+      !empty(
+        $_POST['delete_selected']
+      ) ?
+      ($_POST['delete_selected'] == 'on') ?
+      true :
+      false :
+      false
+      ,
+
     );
 
   }
@@ -228,7 +271,7 @@ class TagManager
 
   // convenience
   public function find($id) {
-    return Utility::findWhere($this->metadata, '_id', $id);
+    return Utility::find_where($this->metadata, '_id', $id);
   }
 
 
@@ -333,12 +376,39 @@ class TagManager
             throw new RuntimeException('The _id doesn\'t exist.');
           }
 
-          // set tags
-          $doc->tags = $obj->tags;
+          // remove selected files
 
-          // set publish date
-          if ($this->post->update_publish_date) {
-            $doc->publish_date = $this->post->update_publish_date;
+          if (
+            gettype($this->post->delete_selected) == 'boolean' &&
+            $this->post->delete_selected === true
+          ) {
+
+            // remove from metadata
+            $key = Utility::get_key($this->metadata, $obj);
+            if (
+              $key !== false &&
+              gettype($key) == 'integer'
+            ) {
+              unset($this->metadata[$key]);
+            }
+
+            // slate for deletion
+            $this->trash[] = './uploads/' . $obj->file_name;
+
+          } else { // only execute if we're not deleting files
+
+            // set tags
+            $doc->tags = $obj->tags;
+
+            // set publish date
+            if ($this->post->update_publish_date) {
+              $doc->publish_date = $this->post->update_publish_date;
+            }
+
+            // set publish status
+            if (gettype($this->post->published) == 'boolean') {
+              $doc->published = $this->post->published;
+            }
           }
 
         } catch (RuntimeException $e) {
@@ -354,7 +424,7 @@ class TagManager
 
 
   // Add tags to all files uploaded
-  public function update_meta(){
+  public function update_meta() {
 
     try {
 
@@ -376,6 +446,9 @@ class TagManager
 
       } // foreach
 
+      // reset array values in case we've removed any documents
+      $this->metadata = array_values($this->metadata);
+
       if (
         !file_put_contents(
           $this->meta_path,
@@ -390,6 +463,18 @@ class TagManager
 
     } catch (RuntimeException $e) {
       echo $e->getMessage();
+    }
+  }
+
+  public function remove_files() {
+    foreach ($this->trash as $file_path) {
+      try {
+        if (!unlink($file_path)) {
+          throw new RuntimeException('Couldn\'t delete file.');
+        }
+      } catch (RuntimeException $e) {
+        echo $e->getMessage();
+      }
     }
   }
 
