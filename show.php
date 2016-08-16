@@ -41,36 +41,39 @@ class Site
         if (property_exists($doc, 'publish_date')) {
           $html .= "data-publish-date='". $doc->publish_date ."'";
         }
+        if (property_exists($doc, 'published')) {
+          $html .= "data-status='". ($doc->published ? 'Published' : 'Draft') ."'";
+        }
         $html .= "data-nice-name='". $doc->name ."'";
         $html .= "data-tags='". json_encode($doc->tags) ."' class='doc'>";
-
         $html .= "<div class='tr'>";
-        $html .= "<div class='tc'>";
-        $html .= "<img src='" . FILE_MANAGER_ASSETS_URI;
 
         switch ($doc->mime_type) {
           case 'image/jpeg':
           case 'image/png':
           case 'image/gif':
-            $html .= $doc->file_path;
+            $img_src = $doc->file_path;
             break;
           case 'application/pdf':
-            $html .= "images/pdf-placeholder.jpg";
+            $img_src = "images/pdf-placeholder.jpg";
             break;
           case 'application/msword':
-            $html .= "images/word-placeholder.png";
+            $img_src = "images/word-placeholder.png";
             break;
           case 'text/plain':
-            $html .= "images/text-placeholder.png";
+            $img_src = "images/text-placeholder.png";
             break;
 
           default:
-            $html .= "images";
+            $img_src = "images";
             break;
         }
 
+        $html .= "<a href='" . FILE_MANAGER_ASSETS_URI . $img_src . "' class='tc gallery'>";
+        $html .= "<img src='" . FILE_MANAGER_ASSETS_URI . $img_src;
+
         $html .= "'>";
-        $html .= "</div>"; // .tc
+        $html .= "</a>"; // .tc
         $html .= "</div>"; // .tr
 
         $html .= "<div class='tr'>";

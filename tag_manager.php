@@ -163,7 +163,7 @@ class TagManager
 
   }
 
-  public function parse_post() {
+  private function parse_post() {
 
     $this->post = (object) array(
       'published' => isset(
@@ -244,7 +244,7 @@ class TagManager
   }
 
   // utility
-  public function readMeta () {
+  private function readMeta () {
 
     // check that metadata file exists, if not, create it
     if (!file_exists($this->meta_path)) {
@@ -265,17 +265,17 @@ class TagManager
   }
 
   // make sure meta exists
-  public function assert_meta () {
+  private function assert_meta () {
     if (!$this->metadata) $this->readMeta();
   }
 
   // convenience
-  public function find($id) {
+  private function find($id) {
     return Utility::find_where($this->metadata, '_id', $id);
   }
 
 
-  public function upload_files() {
+  private function upload_files() {
 
     try {
 
@@ -360,7 +360,7 @@ class TagManager
 
 
   // Update pre-existing metadata
-  public function updated_selection() {
+  private function updated_selection() {
 
     try {
 
@@ -424,7 +424,7 @@ class TagManager
 
 
   // Add tags to all files uploaded
-  public function update_meta() {
+  private function update_meta() {
 
     try {
 
@@ -466,7 +466,7 @@ class TagManager
     }
   }
 
-  public function remove_files() {
+  private function remove_files() {
     foreach ($this->trash as $file_path) {
       try {
         if (!unlink($file_path)) {
@@ -478,7 +478,7 @@ class TagManager
     }
   }
 
-  public function finish(){
+  private function finish(){
     header("Location: {$_SERVER['HTTP_REFERER']}");
     exit;
   }

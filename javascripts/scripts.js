@@ -52,6 +52,21 @@ $(function () {
     $('.doc').height(h);
   };
 
+  var formatDate = function (d) {
+    var months = [
+      'January', 'February', 'March',
+      'April', 'May', 'June', 'July',
+      'August', 'September', 'October',
+      'November', 'December'
+    ];
+
+    var date = new Date(d);
+    var day = date.getDate();
+    var monthIdx = date.getMonth();
+    var year = date.getFullYear();
+    return months[monthIdx] + ' ' + day + ', ' + year;
+  };
+
 
   $(document)
     .drag('start', function (ev, dd) {
@@ -83,10 +98,6 @@ $(function () {
       $(this).removeClass('active');
       updateDocCount();
     })
-    .on('click', function () {
-      $(this).toggleClass('update');
-      updateDocCount();
-    });
   $.drop({
     multi: true
   });
@@ -197,6 +208,39 @@ $(function () {
     e.preventDefault();
     $('#update_files').trigger('click');
   });
+
+  var flspeed = 50;
+  $('a.gallery').featherlightGallery({
+    openSpeed: flspeed,
+    closeSpeed: flspeed,
+    galleryFadeIn: flspeed,
+    galleryFadeOut: flspeed,
+    beforeOpen: function () {
+      $('#finfo').fadeIn(flspeed);
+    },
+    beforeClose: function () {
+      $('#finfo').fadeOut(flspeed);
+    },
+    beforeContent: function () {
+      var path = this.$currentTarget[0].pathname;
+      var slash = path.lastIndexOf('/') + 1;
+      var src = path.slice(slash);
+      var info = $('[data-filename="' + src + '"]').data();
+      var data = {
+        filename: info.filename,
+        niceName: info.niceName,
+        publishDate: formatDate(info.publishDate * 1000),
+        status: info.status,
+        tags: info.tags.join(', ')
+      };
+      for (var key in data) {
+        if ($('[data-lb-' + key + ']').length) {
+          $('[data-lb-' + key + ']').text(data[key]);
+        }
+      }
+    }
+  });
+
 
   // bootstrap
   updateTaglist();

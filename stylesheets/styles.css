@@ -139,3 +139,34 @@ table.fixed{
 .tr{display: table-row;}
 .tc:first-child{display: table-cell; vertical-align: middle;}
 .tc:last-child{display: table-cell; vertical-align: bottom;}
+
+
+/* lightbox plugin */
+.featherlight .featherlight-content {
+  max-height: 70%;
+}
+.featherlight {
+  z-index: 3;
+}
+.wrapper table#finfo {
+  table-layout: fixed;
+  display: none;
+  position:fixed;
+  bottom:30px;
+  z-index:9;
+  background:white;
+  width: 690px;
+  left: 50%;
+  margin-left: -345px;
+  margin-bottom: 0;
+}
+.wrapper table#finfo p{
+  font-size:14px;
+  margin:0;
+}
+.wrapper table#finfo td {
+  padding:10px 15px;
+}
+.wrapper table#finfo td span{
+  font-size:14px;
+}

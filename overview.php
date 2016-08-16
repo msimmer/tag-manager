@@ -8,7 +8,7 @@ Overview Page
 include_once 'show.php'; ?>
 
 <h3 class="floated" style="float:left">File Manager</h3>
-<p class="clear">Upload and tag files here.</p>
+<p class="clear">Upload files and modify their metadata here.</p>
 
 <form name="file_manager" id="file_manager" method="POST" action="<?php echo FILE_MANAGER_ASSETS_URI . 'tag_manager.php'; ?>" enctype="multipart/form-data">
 
