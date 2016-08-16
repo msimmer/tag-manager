@@ -39,6 +39,7 @@ class Site
       foreach ($content as $doc) {
         $html .= "<div data-filename='". $doc->file_name ."'";
         $html .= "data-id='". $doc->_id ."'";
+        $html .= "data-publish-date='". $doc->publish_date ."'";
         $html .= "data-tags='". json_encode($doc->tags) ."' class='doc'>";
         $html .= "<img src='" . FILE_MANAGER_ASSETS_URI;
 
@@ -69,7 +70,10 @@ class Site
           $html .= "<li><a data-remove='".$tag."' href='#'>".$tag."</a></li>";
         }
         $html .= "</ul>";
-        $html .= "<p>". $doc->name ."</p>";
+        if (isset($doc->publish_date)) {
+          $html .= "<p><b>Published</b>: ". date('Y-m-d', $doc->publish_date) ."</p>";
+        }
+        $html .= "<p><b>File Name</b>:". $doc->name ."</p>";
         $html .= "</div>";
       }
 

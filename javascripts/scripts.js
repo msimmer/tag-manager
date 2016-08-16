@@ -1,6 +1,6 @@
 $(function () {
   $(document)
-    .drag("start", function (ev, dd) {
+    .drag('start', function (ev, dd) {
       return $('<div class="selection" />')
         .css('opacity', .65)
         .appendTo(document.body);
@@ -15,40 +15,39 @@ $(function () {
         });
       }, 0);
     })
-    .drag("end", function (ev, dd) {
+    .drag('end', function (ev, dd) {
       $(dd.proxy).remove();
     });
   $('.doc')
-    .drop("start", function () {
-      $(this).addClass("active");
+    .drop('start', function () {
+      $(this).addClass('active');
     })
     .drop(function (ev, dd) {
-      $(this).toggleClass("update");
+      $(this).toggleClass('update');
     })
-    .drop("end", function () {
-      $(this).removeClass("active");
+    .drop('end', function () {
+      $(this).removeClass('active');
+    })
+    .on('click', function () {
+      $(this).toggleClass('update');
     });
   $.drop({
     multi: true
   });
 
-  // toggle on click
-  $('.doc').on('click', function () {
-    $(this).toggleClass('update');
-  });
-
 
   // write metadata for updated files
-  $('#updateFileSubmit').on('click', function (e) {
+  $('#update_files').on('click', function (e) {
     var updates = [];
-    $('[data-changed=true]').each(function () {
+    $('[data-changed=true], .update').each(function () {
       updates.push({
         _id: $(this).attr('data-id'),
         tags: JSON.parse($(this).attr('data-tags')),
-        file_name: $(this).attr('data-filename')
+        file_name: $(this).attr('data-filename'),
+        publish_date: $('input[name=update_publish_date]').val()
       });
     });
-    $('input[name=filesupdate]').val(JSON.stringify(updates));
+    $('input[name=files_update]').val(JSON.stringify(updates));
   });
 
 
@@ -65,13 +64,15 @@ $(function () {
   });
 
   var sanitized = function () {
-    if ($('input[name=updateTags]').val().match(/^\s*$/)) {
+    if ($('input[name=update_tags]').val().match(/^\s*$/)) {
       return;
     }
-    var taglist = $('input[name=updateTags]').val().split(',');
-    taglist = taglist.map(function (item) {
-      return item.replace(/^\s*|\s*$/, '')
-    });
+    var taglist = $('input[name=update_tags]')
+      .val()
+      .split(',')
+      .map(function (item) {
+        return item.replace(/^\s*|\s*$/, '')
+      });
     return taglist;
   };
 
@@ -112,7 +113,7 @@ $(function () {
     });
   });
 
-  $(document).on('click', 'input[name=addTags]', function (e) {
+  $(document).on('click', 'input[name=add_tags]', function (e) {
     e.preventDefault();
     var taglist = sanitized();
     $('.update').each(function () {
@@ -132,7 +133,7 @@ $(function () {
     updateTaglist();
   });
 
-  $(document).on('click', 'input[name=removeTags]', function (e) {
+  $(document).on('click', 'input[name=remove_tags]', function (e) {
     e.preventDefault();
     var taglist = sanitized();
     $('.update').each(function () {

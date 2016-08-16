@@ -1,12 +1,12 @@
 <?php
 
+date_default_timezone_set('Europe/Berlin');
+
 /**
 *
 */
 class Utility
 {
-
-  private static $meta_path = './uploads/metadata.txt';
 
   public static function findWhere($arr, $prop, $val) {
     foreach ($arr as $item) {
@@ -23,14 +23,17 @@ class Utility
   public static function findAll($arr, $prop, $val) {
     $result = [];
     foreach ($arr as $item) {
-      if (isset($item->{$prop}) && $item->{$prop} == $val) {
+      if (
+        isset($item->{$prop}) &&
+        $item->{$prop} == $val
+      ) {
         $result[] = $item;
       }
     }
     return $result;
   }
 
-  // check if a document is a 'member' of a collection
+  // check if a document is a member of a collection
   public static function belongsTo($obj, $key) {
     try {
       if (
@@ -41,7 +44,10 @@ class Utility
       }
 
       return (bool) (
-        array_search($key, $obj->collections) > -1
+        array_search(
+          $key,
+          $obj->collections
+        ) > -1
       );
 
     } catch (RuntimeException $e) {
@@ -60,7 +66,10 @@ class Utility
       }
 
       return (bool) (
-        array_search($key, $obj->tags) > -1
+        array_search(
+          $key,
+          $obj->tags
+        ) > -1
       );
 
     } catch (RuntimeException $e) {
@@ -68,7 +77,7 @@ class Utility
     }
   }
 
-  public static function template($data, $index) {
+  public static function template($data, $post, $index) {
     $pinfo = pathinfo($data['name'][$index]);
     $finfo = new finfo(FILEINFO_MIME_TYPE);
     $file_name = sprintf('%s.%s',
@@ -79,6 +88,7 @@ class Utility
       '_id' => sha1((string) rand(100000000000,999999999999)),
       'name' => $pinfo['basename'],
       'created_at' => time(),
+      'publish_date' => $post->update_publish_date || $post->add_publish_date,
       'mime_type' => $finfo->file($data['tmp_name'][$index]),
       'extension' => $pinfo['extension'],
       'file_name' => $file_name,
@@ -97,42 +107,98 @@ class Utility
 class TagManager
 {
 
-  private $ext = NULL;
   private $files = [];
-  private $file_paths = [];
   private $metadata = NULL;
   private $meta_path = './uploads/metadata.txt';
   private $tags = NULL;
-
+  private $post = NULL;
 
   public function __construct(){
 
     // make sure there's post!
     if (!isset($_POST)) return;
 
+    // store post vars
+    $this->parse_post();
+
     // make sure there's meta!
-    $this->assertMeta();
+    $this->assert_meta();
 
     // update files and include tags with them
     // or
     // select pre-existing files and update their metadata
 
     // upload any files that have been selected
-    $this->uploadFiles();
+    $this->upload_files();
 
     // around here we're also going to want to check if there are pre-existing
     // files that have been selected that we need to update
-    $this->updateSelection();
+    $this->updated_selection();
 
     // update metadata file
-    $this->updateMeta();
+    $this->update_meta();
 
     // redirect to the referring page
     $this->finish();
 
   }
 
+  public function parse_post() {
 
+    $this->post = (object) array(
+      'tags' => isset(
+        $_POST['tags']
+      ) &&
+      !empty(
+        $_POST['tags']
+      ) ?
+      preg_split(
+        '~\s*,\s*~',
+        trim($_POST['tags']),
+        -1,
+        PREG_SPLIT_NO_EMPTY
+      ) :
+      NULL
+      ,
+      'add_publish_date' => isset(
+        $_POST['add_publish_date']
+      ) &&
+      preg_match(
+          '~[0-9]{4}\-[0-9]{2}\-[0-9]{2}~',
+          $_POST['add_publish_date']
+      ) ?
+      strtotime($_POST['add_publish_date']) :
+      NULL
+      ,
+      'update_publish_date' => isset(
+        $_POST['update_publish_date']
+      ) &&
+      preg_match(
+          '~[0-9]{4}\-[0-9]{2}\-[0-9]{2}~',
+          $_POST['update_publish_date']
+      ) ?
+      strtotime($_POST['update_publish_date']) :
+      NULL
+      ,
+      'max_file_size' => isset(
+        $_POST['MAX_FILE_SIZE']
+      ) ?
+      $_POST['MAX_FILE_SIZE'] :
+      1000000
+      ,
+      'files_update' => isset(
+        $_POST['files_update']
+      ) &&
+      !empty(
+        json_decode($_POST['files_update'])
+      ) ?
+      json_decode($_POST['files_update']) :
+      NULL
+      ,
+
+    );
+
+  }
 
   // utility
   public function readMeta () {
@@ -156,7 +222,7 @@ class TagManager
   }
 
   // make sure meta exists
-  public function assertMeta () {
+  public function assert_meta () {
     if (!$this->metadata) $this->readMeta();
   }
 
@@ -166,36 +232,35 @@ class TagManager
   }
 
 
-  public function uploadFiles() {
+  public function upload_files() {
 
     try {
 
-      // No files were sent, update existing
+      // No files were sent, only update existing
       if (
         !isset($_FILES) ||
-        !isset($_FILES['userfiles']
+        !isset($_FILES['user_files']
       )) {
         return;
       }
 
       // Undefined | Check errors in Multiple Files | $_FILES Corruption Attack
       // If this request falls under any of them, treat it invalid.
-      if (!isset($_FILES['userfiles']['error'])) {
+      if (!isset($_FILES['user_files']['error'])) {
         throw new RuntimeException('Invalid parameters.');
       }
 
-      foreach ($_FILES['userfiles']['error'] as $errors) {
+      foreach ($_FILES['user_files']['error'] as $errors) {
         if (isset($errors[0])) {
           throw new RuntimeException('Invalid parameters.');
         }
 
-        // Check each $_FILES['userfiles']['error'] value.
+        // Check each $_FILES['user_files']['error'] value
         switch ($errors) {
           case UPLOAD_ERR_OK:
             break;
           case UPLOAD_ERR_NO_FILE:
-            return;
-            // throw new RuntimeException('No file sent.');
+            return; // No files sent
           case UPLOAD_ERR_INI_SIZE:
           case UPLOAD_ERR_FORM_SIZE:
             throw new RuntimeException('Exceeded filesize limit.');
@@ -205,21 +270,20 @@ class TagManager
 
       } // foreach
 
-      // You should also check filesize here.
-      foreach ($_FILES['userfiles']['size'] as $size) {
-        if ($size > 1000000) {
+      // Check filesizes
+      foreach ($_FILES['user_files']['size'] as $size) {
+        if ($size > $this->post->max_file_size) {
           throw new RuntimeException('Exceeded filesize limit.');
         }
       } // foreach
 
 
-      // DO NOT TRUST $_FILES['userfiles']['mime'] VALUE !!
-      // Check MIME Type by yourself.
+      // Check MIME Types
       $finfo = new finfo(FILEINFO_MIME_TYPE);
-      for ($i=0; $i < sizeof($_FILES['userfiles']['name']); $i++) {
+      for ($i=0; $i < sizeof($_FILES['user_files']['name']); $i++) {
 
         if (false === $ext = array_search(
-          $finfo->file($_FILES['userfiles']['tmp_name'][$i]),
+          $finfo->file($_FILES['user_files']['tmp_name'][$i]),
           array(
             'jpg' => 'image/jpeg',
             'png' => 'image/png',
@@ -233,10 +297,10 @@ class TagManager
           throw new RuntimeException('Invalid file format.');
         }
 
-        $this->files[] = Utility::template($_FILES['userfiles'], $i);
+        $this->files[] = Utility::template($_FILES['user_files'], $this->post, $i);
 
         if (!move_uploaded_file(
-          $_FILES['userfiles']['tmp_name'][$i],
+          $_FILES['user_files']['tmp_name'][$i],
           $this->files[$i]->file_path
         )) {
           throw new RuntimeException('Failed to move uploaded file.');
@@ -252,21 +316,14 @@ class TagManager
   }
 
 
-  //
-  public function updateSelection() {
+  // Update pre-existing metadata
+  public function updated_selection() {
 
     try {
 
-      if (
-        !isset($_POST) ||
-        !isset($_POST['filesupdate']) ||
-        empty($objs = json_decode($_POST['filesupdate']))
-      ) {
-        // throw new RuntimeException('No files to update.');
-        return;
-      }
+      if (!$this->post->files_update) return;
 
-      foreach ($objs as $obj) {
+      foreach ($this->post->files_update as $obj) {
         try {
           if (!file_exists('./uploads/' . $obj->file_name)) {
             throw new RuntimeException('Attempting to update a file that doesn\'t exist.');
@@ -276,7 +333,13 @@ class TagManager
             throw new RuntimeException('The _id doesn\'t exist.');
           }
 
+          // set tags
           $doc->tags = $obj->tags;
+
+          // set publish date
+          if ($this->post->update_publish_date) {
+            $doc->publish_date = $this->post->update_publish_date;
+          }
 
         } catch (RuntimeException $e) {
           echo $e->getMessage();
@@ -291,35 +354,19 @@ class TagManager
 
 
   // Add tags to all files uploaded
-  public function updateMeta(){
+  public function update_meta(){
 
     try {
-
-      if (
-        !isset($_POST) ||
-        !isset($_POST['tags']) ||
-        empty($_POST['tags'])
-      ) {
-        // throw new RuntimeException('No tags.');
-        // return;
-      } else {
-        $this->tags = preg_split(
-          '/\s*,\s*/',
-          trim($_POST['tags']),
-          -1,
-          PREG_SPLIT_NO_EMPTY
-        );
-      }
 
       // start adding tags to metadata
       foreach ($this->files as $doc) {
 
-        if ($this->tags) {
+        if ($this->post->tags) {
 
           $doc->tags = array_unique(
             array_merge(
               $doc->tags,
-              $this->tags
+              $this->post->tags
           ));
         }
 
