@@ -99,7 +99,7 @@ class Utility
     return (object) array(
       '_id' => sha1((string) rand(100000000000,999999999999)),
       'name' => $pinfo['basename'],
-      'published' => $post->published,
+      'published' => $post->published || $post->published_add,
       'created_at' => time(),
       'publish_date' =>
         ($post->update_publish_date != NULL) ? $post->update_publish_date :
@@ -120,7 +120,7 @@ class Utility
 /**
 *
 */
-class TagManager
+class Tags
 {
 
   private $files = array();
@@ -177,6 +177,19 @@ class TagManager
       false :
       false
       ,
+
+      'published_add' => isset(
+        $_POST['published_add']
+      ) &&
+      !empty(
+        $_POST['published_add']
+      ) ?
+      ($_POST['published_add'] == 'on') ?
+      true :
+      false :
+      false
+      ,
+
       'tags' => isset(
         $_POST['tags']
       ) &&
@@ -486,4 +499,4 @@ class TagManager
 }
 
 
-$tag_manager = new TagManager;
+$tags = new Tags;

@@ -1,7 +1,7 @@
 <?php
 /*
 
-Overview Page
+View Page
 
 */
 
@@ -10,7 +10,7 @@ include_once 'show.php'; ?>
 <h3 class="floated" style="float:left">File Manager</h3>
 <p class="clear">Upload files and modify their metadata here.</p>
 
-<form name="file_manager" id="file_manager" method="POST" action="<?php echo FILE_MANAGER_ASSETS_URI . 'tag_manager.php'; ?>" enctype="multipart/form-data">
+<form name="file_manager" id="file_manager" method="POST" action="<?php echo FILE_MANAGER_ASSETS_URI . 'tags.php'; ?>" enctype="multipart/form-data">
 
   <div id="metadata_window">
     <div class="leftopt">
@@ -22,12 +22,16 @@ include_once 'show.php'; ?>
         <input class="text autowidth" name="user_files[]" type="file" multiple>
       </p>
       <p class="inline clearfix">
-        <label for="add_publish_date">Publish Date:</label>
-        <input class="text autowidth" type="date" name="add_publish_date" placeholder="Publish Date" value="" novalidate>
-      </p>
-      <p class="inline clearfix">
         <label for="tags">Tags:</label>
         <input class="text autowidth" type="text" name="tags" placeholder="">
+      </p>
+      <p class="inline clearfix">
+        <label for="published_add">Published:</label>
+        <input class="checkbox autowidth" type="checkbox" name="published_add">
+      </p>
+      <p class="inline clearfix">
+        <label for="add_publish_date">Publish Date:</label>
+        <input class="text autowidth" type="date" name="add_publish_date" placeholder="Publish Date" value="<?php echo date('Y-m-d'); ?>" novalidate>
       </p>
       <p class="inline clearfix">
         <label for="add_submit">Add Files:</label>
@@ -39,7 +43,7 @@ include_once 'show.php'; ?>
     <div class="rightopt">
       <h3 class="options-header">Update Selection</h3>
       <p class="inline clearfix">
-        <span class="doc-count">0</span> Documents Selected
+        <b><span class="doc-count">0</span> Documents Selected</b>
       </p>
 
       <p class="inline clearfix">
@@ -62,7 +66,7 @@ include_once 'show.php'; ?>
 
       <p class="inline clearfix">
         <label for="update_publish_date">Publish Date:</label>
-        <input class="text autowidth" type="date" name="update_publish_date" placeholder="Publish Date" value="" novalidate>
+        <input class="text autowidth" type="date" name="update_publish_date" placeholder="Publish Date" value="<?php echo date('Y-m-d'); ?>" novalidate>
 
         <!-- hidden form submit triggered by sidebar -->
         <input class="hidden" id="update_files" type="submit" name="submit_update" value="Submit">

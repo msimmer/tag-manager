@@ -3,10 +3,10 @@
   "authors": [
     "Maxwell Simmer <maxwell.simmer@gmail.com>"
   ],
-  "description": "",
+  "description": "A GetSimple CMS Plugin for Tagging Content",
   "main": "",
   "license": "MIT",
-  "homepage": "http://maxwellsimmer.com",
+  "homepage": "https://github.com/msimmer/tag-manager",
   "ignore": [
     "**/.*",
     "node_modules",

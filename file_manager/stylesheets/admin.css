@@ -1,0 +1,5 @@
+
+a.files[href='upload.php'] {
+  display: none!important;
+  pointer-events: none!important;
+}
