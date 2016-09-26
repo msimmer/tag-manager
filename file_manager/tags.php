@@ -125,7 +125,8 @@ class Tags
 
   private $files = array();
   private $metadata = NULL;
-  private $meta_path = './uploads/metadata.txt';
+  private $meta_path = './uploads/metadata.json';
+  private $tags_path = './uploads/tags.txt';
   private $tags = NULL;
   private $post = NULL;
   private $trash = array();
@@ -154,6 +155,9 @@ class Tags
 
     // update metadata file
     $this->update_meta();
+
+    // update list of all tags
+    $this->update_tags_list();
 
     // remove files if there are any in the trash
     $this->remove_files();
@@ -476,6 +480,61 @@ class Tags
 
     } catch (RuntimeException $e) {
       echo $e->getMessage();
+    }
+  }
+
+  private function update_tags_list(){
+
+    $files = NULL;
+
+    if (isset($this->files) && !empty($this->files)) {
+      $files = $this->files;
+    } elseif (isset($this->post->files_update) && !empty($this->post->files_update)) {
+      $files = $this->post->files_update;
+    } elseif (isset($this->trash) && !empty($this->trash)) {
+      $files = $this->trash;
+    }
+
+    if (!$files) return;
+
+    foreach ($files as $file) {
+      $post_id = $file->_id;
+      $post_tags = $file->tags;
+      $tags_data = file_get_contents($this->tags_path);
+      $all_tags = (!$tags_data || $tags_data == '') ? array() : unserialize($tags_data);
+
+      // add tags if they don't exist, and add post_id to tag
+      foreach ($post_tags as $tag) {
+        if (!array_key_exists($tag, $all_tags)) {
+          $all_tags[$tag] = array();
+        }
+        if (!in_array($post_id, $all_tags[$tag])) {
+          $all_tags[$tag][] = $post_id;
+        }
+      }
+
+      // remove post_id from tag list if tag is un-checked, remove tag from all_tags if it's empty
+      foreach ($all_tags as $key => $tag) {
+        if ($file->delete_selected) {
+          if (in_array($key, $post_tags) && in_array($post_id, $tag)) {
+            $index = array_keys($all_tags[$key], $post_id)[0];
+            unset($all_tags[$key][$index]);
+            if (empty($all_tags[$key])) {
+              unset($all_tags[$key]);
+            }
+          }
+        } else if (!in_array($key, $post_tags) && in_array($post_id, $tag)) {
+          $index = array_keys($all_tags[$key], $post_id)[0];
+          unset($all_tags[$key][$index]);
+          if (empty($all_tags[$key])) {
+            unset($all_tags[$key]);
+          }
+        }
+
+
+      }
+
+      file_put_contents($this->tags_path, serialize($all_tags));
     }
   }
 

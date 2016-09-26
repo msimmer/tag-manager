@@ -22,7 +22,8 @@ define('FILE_MANAGER_PLUGIN_NAME', basename(__FILE__, '.php'));
 define('FILE_MANAGER_VERSION', '0.1.0');
 define('FILE_MANAGER_DIR', 'file_manager/');
 define('FILE_MANAGER_UPLOADS_PATH', dirname(__FILE__) . '/' . FILE_MANAGER_DIR . 'uploads/');
-define('FILE_MANAGER_META_PATH', dirname(__FILE__) . '/' . FILE_MANAGER_DIR . 'uploads/metadata.txt');
+define('FILE_MANAGER_META_PATH', dirname(__FILE__) . '/' . FILE_MANAGER_DIR . 'uploads/metadata.json');
+define('FILE_MANAGER_TAG_LIST', dirname(__FILE__) . '/' . FILE_MANAGER_DIR . 'uploads/tags.txt');
 define('FILE_MANAGER_PLUGIN_URI', $SITEURL . $GSADMIN . '/plugins/');
 define('FILE_MANAGER_ASSETS_URI', $SITEURL . 'plugins/file_manager/');
 
@@ -49,6 +50,38 @@ add_action('file_manager-sidebar', 'createSideMenu', array(FILE_MANAGER_PLUGIN_N
 // backend hooks
 add_action('admin-pre-header', 'fm_pre_header');
 add_action('admin-pre-header', 'fm_scripts_styles');
+add_action('changedata-save','fm_pre_save');
+
+// page save hook
+function fm_pre_save(){
+  $post_id = $_POST['post-id'];
+  $post_tags = explode(',', $_POST['post-metak']);
+  $tags_data = file_get_contents(FILE_MANAGER_TAG_LIST);
+  $all_tags = (!$tags_data || $tags_data == '') ? array() : unserialize($tags_data);
+
+  // add tags if they don't exist, and add post_id to tag
+  foreach ($post_tags as $tag) {
+    if (!array_key_exists($tag, $all_tags)) {
+      $all_tags[$tag] = array();
+    }
+    if (!in_array($post_id, $all_tags[$tag])) {
+      $all_tags[$tag][] = $post_id;
+    }
+  }
+
+  // remove post_id from tag list if tag is un-checked, remove tag from all_tags if it's empty
+  foreach ($all_tags as $key => $tag) {
+    if (!in_array($key, $post_tags) && in_array($post_id, $tag)) {
+      $index = array_keys($all_tags[$key], $post_id)[0];
+      unset($all_tags[$key][$index]);
+      if (empty($all_tags[$key])) {
+        unset($all_tags[$key]);
+      }
+    }
+  }
+
+  file_put_contents(FILE_MANAGER_TAG_LIST, serialize($all_tags));
+}
 
 // redirects
 function fm_pre_header() {
