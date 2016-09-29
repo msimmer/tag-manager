@@ -17,7 +17,7 @@ include_once 'show.php'; ?>
       <h3 class="options-header">Add Files</h3>
       <p class="inline clearfix">
         <label for="files_update">Add Files:</label>
-        <input type="hidden" name="MAX_FILE_SIZE" value="1000000" />
+        <input type="hidden" name="MAX_FILE_SIZE" value="2000000" />
         <input type="hidden" name="files_update" value="">
         <input class="text autowidth" name="user_files[]" type="file" multiple>
       </p>
@@ -100,3 +100,26 @@ echo $html;
 echo "<hr style='clear:both;visibility:hidden;'>";?>
 
 
+<script>
+  var fileinput = $('[type=file]');
+  var maxsize = parseInt($('[name="MAX_FILE_SIZE"]').val(), 10);
+  fileinput.on('change', function(){
+    var message = '';
+    var oversize = [];
+    var files = this.files;
+    for (var i = 0; i < files.length; i++) {
+      if (files[i].size > maxsize) {
+        oversize.push(files[i]);
+      }
+    }
+    if (oversize.length) {
+      message += 'The operation could not be completed because the following files are over the allowed limit of ';
+      message += maxsize / 1000000 + ' Mb:\n\n';
+      for (var i = 0; i < oversize.length; i++) {
+        message += oversize[i].name + '\n';
+      }
+      alert(message);
+      this.value = '';
+    }
+  })
+</script>

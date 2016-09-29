@@ -100,7 +100,7 @@ class Utility
       '_id' => sha1((string) rand(100000000000,999999999999)),
       'name' => $pinfo['basename'],
       'published' => $post->published || $post->published_add,
-      'created_at' => time(),
+      'creation_date' => time(),
       'publish_date' =>
         ($post->update_publish_date != NULL) ? $post->update_publish_date :
         ($post->add_publish_date != NULL) ? $post->add_publish_date :
@@ -515,7 +515,10 @@ class Tags
 
       // remove post_id from tag list if tag is un-checked, remove tag from all_tags if it's empty
       foreach ($all_tags as $key => $tag) {
-        if ($file->delete_selected) {
+        if (
+          property_exists($file, 'delete_selected') &&
+          $file->delete_selected
+        ) {
           if (in_array($key, $post_tags) && in_array($post_id, $tag)) {
             $index = array_keys($all_tags[$key], $post_id)[0];
             unset($all_tags[$key][$index]);
@@ -523,7 +526,7 @@ class Tags
               unset($all_tags[$key]);
             }
           }
-        } else if (!in_array($key, $post_tags) && in_array($post_id, $tag)) {
+        } elseif (!in_array($key, $post_tags) && in_array($post_id, $tag)) {
           $index = array_keys($all_tags[$key], $post_id)[0];
           unset($all_tags[$key][$index]);
           if (empty($all_tags[$key])) {
