@@ -96,19 +96,38 @@ class Utility
       sha1_file($data['tmp_name'][$index]),
       $pinfo['extension']
     );
+    $publish_date = NULL;
+    if ($post->update_publish_date != NULL) {
+      $publish_date = $post->update_publish_date;
+    } elseif ($post->add_publish_date != NULL) {
+      $publish_date = $post->add_publish_date;
+    }
+    $dimensions = [];
+    switch ($finfo->file($data['tmp_name'][$index])) {
+      case 'image/jpeg':
+      case 'image/png':
+      case 'image/gif':
+        $image_size = getimagesize($data['tmp_name'][$index]);
+        preg_match_all('~["](\d+)["]~', $image_size[3], $matches);
+        $dimensions['width'] = $matches[1][0];
+        $dimensions['height'] = $matches[1][1];
+        break;
+
+      default:
+        break;
+    }
+
     return (object) array(
       '_id' => sha1((string) rand(100000000000,999999999999)),
       'name' => $pinfo['basename'],
       'published' => $post->published || $post->published_add,
       'creation_date' => time(),
-      'publish_date' =>
-        ($post->update_publish_date != NULL) ? $post->update_publish_date :
-        ($post->add_publish_date != NULL) ? $post->add_publish_date :
-        NULL,
+      'publish_date' => $publish_date,
       'mime_type' => $finfo->file($data['tmp_name'][$index]),
       'extension' => $pinfo['extension'],
       'file_name' => $file_name,
       'file_path' => 'uploads/'. $file_name,
+      'dimensions' => $dimensions,
       'tags' => [],
       'collections' => []
     );
